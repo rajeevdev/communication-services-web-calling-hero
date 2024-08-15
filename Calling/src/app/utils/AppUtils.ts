@@ -81,6 +81,24 @@ export const getTeamsLinkFromUrl = (): TeamsMeetingLinkLocator | undefined => {
   return teamsLink ? { meetingLink: teamsLink } : undefined;
 };
 
+export const getTeamsIdFromUrl = (): string | undefined => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const teamsId = urlParams.get('teamsId');
+  return teamsId ? teamsId : undefined;
+};
+
+export const getTeamsTokenFromUrl = (): string | undefined => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('teamsToken');
+  return token ? token : undefined;
+};
+
+export const getDisplayNameFromUrl = (): string | undefined => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('displayName');
+  return token ? token : undefined;
+};
+
 /**
  * Get teams meeting id and passcode from the url's query params.
  */

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stack, PrimaryButton, Image, ChoiceGroup, IChoiceGroupOption, Text, TextField } from '@fluentui/react';
 import heroSVG from '../../assets/hero.svg';
 import {
@@ -26,6 +26,10 @@ import { RoomLocator, TeamsMeetingLinkLocator } from '@azure/communication-calli
 import { TeamsMeetingIdLocator } from '@azure/communication-calling';
 import { getRoomIdFromUrl } from '../utils/AppUtils';
 import { getIsCTE } from '../utils/AppUtils';
+import { getTeamsIdFromUrl } from '../utils/AppUtils';
+import { getTeamsTokenFromUrl } from '../utils/AppUtils';
+import { getDisplayNameFromUrl } from '../utils/AppUtils';
+
 import { CallAdapterLocator } from '@azure/communication-react';
 
 export type CallOption = 'ACSCall' | 'TeamsMeeting' | 'Rooms' | 'StartRooms' | 'TeamsIdentity' | 'TeamsAdhoc';
@@ -69,7 +73,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
   ];
 
   // Get display name from local storage if available
-  const defaultDisplayName = localStorageAvailable ? getDisplayNameFromLocalStorage() : null;
+  const defaultDisplayName = localStorageAvailable ? getDisplayNameFromUrl() : null;
   const [displayName, setDisplayName] = useState<string | undefined>(defaultDisplayName ?? undefined);
 
   const [chosenCallOption, setChosenCallOption] = useState<ICallChoiceGroupOption>(callOptions[0]);
@@ -98,6 +102,12 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
   const showDisplayNameField = !teamsIdentityChosen;
 
   const [teamsIdFormatError, setTeamsIdFormatError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTeamsId(getTeamsIdFromUrl());
+    setTeamsToken(getTeamsTokenFromUrl());
+    setDisplayName(getDisplayNameFromUrl());
+  }, []);
 
   return (
     <Stack
@@ -181,6 +191,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                 <TextField
                   className={teamsItemStyle}
                   label={teamsTokenLabel}
+                  value={teamsToken}
                   required
                   placeholder={'Enter a Teams Token'}
                   onChange={(_, newValue) => setTeamsToken(newValue)}
@@ -192,6 +203,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                 <TextField
                   className={teamsItemStyle}
                   label={teamsIdLabel}
+                  value={teamsId}
                   required
                   placeholder={'Enter a Teams user ID (8:orgid:<UUID>)'}
                   errorMessage={
