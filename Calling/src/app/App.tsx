@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { CommunicationUserIdentifier } from '@azure/communication-common';
-import { ParticipantRole } from '@azure/communication-calling';
+// import { ParticipantRole } from '@azure/communication-calling';
 import { fromFlatCommunicationIdentifier, StartCallIdentifier } from '@azure/communication-react';
 import { MicrosoftTeamsUserIdentifier } from '@azure/communication-common';
 import { setLogLevel } from '@azure/logger';
@@ -10,22 +10,22 @@ import { initializeIcons, Spinner } from '@fluentui/react';
 import { CallAdapterLocator } from '@azure/communication-react';
 import React, { useEffect, useState } from 'react';
 import {
-  createGroupId,
-  fetchTokenResponse,
-  getGroupIdFromUrl,
+  // createGroupId,
+  // fetchTokenResponse,
+  // getGroupIdFromUrl,
   getTeamsLinkFromUrl,
   isLandscape,
   isOnIphoneAndNotSafari,
   navigateToHomePage,
   WEB_APP_TITLE
 } from './utils/AppUtils';
-import { createRoom, getRoomIdFromUrl, addUserToRoom } from './utils/AppUtils';
+// import { createRoom, getRoomIdFromUrl, addUserToRoom } from './utils/AppUtils';
 import { useIsMobile } from './utils/useIsMobile';
 import { CallError } from './views/CallError';
 import { CallScreen } from './views/CallScreen';
 import { HomeScreen } from './views/HomeScreen';
 import { UnsupportedBrowserPage } from './views/UnsupportedBrowserPage';
-import { getMeetingIdFromUrl } from './utils/AppUtils';
+// import { getMeetingIdFromUrl } from './utils/AppUtils';
 
 setLogLevel('error');
 
@@ -39,7 +39,7 @@ const App = (): JSX.Element => {
   // User credentials to join a call with - these are retrieved from the server
   const [token, setToken] = useState<string>();
   const [userId, setUserId] = useState<CommunicationUserIdentifier | MicrosoftTeamsUserIdentifier>();
-  //const [userCredentialFetchError, setUserCredentialFetchError] = useState<boolean>(false);
+  const [userCredentialFetchError, setUserCredentialFetchError] = useState<boolean>(false);
 
   // Call details to join a call - these are collected from the user on the home screen
   const [callLocator, setCallLocator] = useState<CallAdapterLocator>();
@@ -49,18 +49,18 @@ const App = (): JSX.Element => {
   const [isTeamsCall, setIsTeamsCall] = useState<boolean>(false);
 
   // Get Azure Communications Service token from the server
-  //useEffect(() => {
-    // (async () => {
-    //   try {
-    //     const { token, user } = await fetchTokenResponse();
-    //     setToken(token);
-    //     setUserId(user);
-    //   } catch (e) {
-    //     console.error(e);
-    //     setUserCredentialFetchError(true);
-    //   }
-    // })();
-  //}, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const { token, user } = await fetchTokenResponse();
+  //       setToken(token);
+  //       setUserId(user);
+  //     } catch (e) {
+  //       console.error(e);
+  //       setUserCredentialFetchError(true);
+  //     }
+  //   })();
+  // }, []);
 
   const isMobileSession = useIsMobile();
   const isLandscapeSession = isLandscape();
@@ -80,56 +80,62 @@ const App = (): JSX.Element => {
     case 'home': {
       document.title = `home - ${WEB_APP_TITLE}`;
       // Show a simplified join home screen if joining an existing call
-      const joiningExistingCall: boolean =
-        !!getGroupIdFromUrl() || !!getTeamsLinkFromUrl() || !!getMeetingIdFromUrl() || !!getRoomIdFromUrl();
+      // const joiningExistingCall: boolean =
+      //   !!getGroupIdFromUrl() || !!getTeamsLinkFromUrl() || !!getMeetingIdFromUrl() || !!getRoomIdFromUrl();
+      const joiningExistingCall: boolean = !!getTeamsLinkFromUrl();
       return (
         <HomeScreen
           joiningExistingCall={joiningExistingCall}
           startCallHandler={async (callDetails) => {
             setDisplayName(callDetails.displayName);
+
             let callLocator: CallAdapterLocator | undefined =
-              callDetails.callLocator ||
-              getRoomIdFromUrl() ||
-              getTeamsLinkFromUrl() ||
-              getMeetingIdFromUrl() ||
-              getGroupIdFromUrl() ||
-              createGroupId();
+            callDetails.callLocator ||
+            getTeamsLinkFromUrl();
 
-            if (callDetails.option === 'Rooms') {
-              callLocator = getRoomIdFromUrl() || callDetails.callLocator;
-            }
+            // let callLocator: CallAdapterLocator | undefined =
+            //   callDetails.callLocator ||
+            //   getRoomIdFromUrl() ||
+            //   getTeamsLinkFromUrl() ||
+            //   getMeetingIdFromUrl() ||
+            //   getGroupIdFromUrl() ||
+            //   createGroupId();
 
-            if (callDetails.option === 'TeamsAdhoc') {
-              const outboundTeamsUsers = callDetails.outboundTeamsUsers?.map((user) => {
-                return fromFlatCommunicationIdentifier(user) as StartCallIdentifier;
-              });
-              callLocator = undefined;
-              setTargetCallees(outboundTeamsUsers);
-            }
+            // if (callDetails.option === 'Rooms') {
+            //   callLocator = getRoomIdFromUrl() || callDetails.callLocator;
+            // }
+
+            // if (callDetails.option === 'TeamsAdhoc') {
+            //   const outboundTeamsUsers = callDetails.outboundTeamsUsers?.map((user) => {
+            //     return fromFlatCommunicationIdentifier(user) as StartCallIdentifier;
+            //   });
+            //   callLocator = undefined;
+            //   setTargetCallees(outboundTeamsUsers ?? []);
+            // }
 
             // There is an API call involved with creating a room so lets only create one if we know we have to
-            if (callDetails.option === 'StartRooms') {
-              let roomId = '';
-              try {
-                roomId = await createRoom();
-              } catch (e) {
-                console.log(e);
-              }
+            // if (callDetails.option === 'StartRooms') {
+            //   let roomId = '';
+            //   try {
+            //     roomId = await createRoom();
+            //   } catch (e) {
+            //     console.log(e);
+            //   }
 
-              callLocator = { roomId: roomId };
-            }
+            //   callLocator = { roomId: roomId };
+            // }
 
-            if (callLocator && 'roomId' in callLocator) {
-              if (userId && 'communicationUserId' in userId) {
-                await addUserToRoom(
-                  userId.communicationUserId,
-                  callLocator.roomId,
-                  callDetails.role as ParticipantRole
-                );
-              } else {
-                throw 'Invalid userId!';
-              }
-            }
+            // if (callLocator && 'roomId' in callLocator) {
+            //   if (userId && 'communicationUserId' in userId) {
+            //     await addUserToRoom(
+            //       userId.communicationUserId,
+            //       callLocator.roomId,
+            //       callDetails.role as ParticipantRole
+            //     );
+            //   } else {
+            //     throw 'Invalid userId!';
+            //   }
+            // }
 
             setCallLocator(callLocator);
 
@@ -152,17 +158,17 @@ const App = (): JSX.Element => {
     }
 
     case 'call': {
-      // if (userCredentialFetchError) {
-      //   document.title = `error - ${WEB_APP_TITLE}`;
-      //   return (
-      //     <CallError
-      //       title="Error getting user credentials from server"
-      //       reason="Ensure the sample server is running."
-      //       rejoinHandler={() => setPage('call')}
-      //       homeHandler={navigateToHomePage}
-      //     />
-      //   );
-      // }
+      if (userCredentialFetchError) {
+        document.title = `error - ${WEB_APP_TITLE}`;
+        return (
+          <CallError
+            title="Error getting user credentials from server"
+            reason="Ensure the sample server is running."
+            rejoinHandler={() => setPage('call')}
+            homeHandler={navigateToHomePage}
+          />
+        );
+      }
 
       if (!token || !userId || (!displayName && !isTeamsCall) || (!targetCallees && !callLocator)) {
         document.title = `credentials - ${WEB_APP_TITLE}`;
@@ -201,6 +207,7 @@ const getJoinParams = (locator: CallAdapterLocator): string => {
   if ('roomId' in locator) {
     return '?roomId=' + encodeURIComponent(locator.roomId);
   }
+
   return '?groupId=' + encodeURIComponent(locator.groupId);
 };
 

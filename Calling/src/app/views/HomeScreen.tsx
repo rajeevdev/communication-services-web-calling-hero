@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 
 import React, { useState, useEffect } from 'react';
-import { Stack, PrimaryButton, Image, ChoiceGroup, IChoiceGroupOption, Text, TextField } from '@fluentui/react';
+// import { Stack, PrimaryButton, Image, ChoiceGroup, IChoiceGroupOption, Text, TextField } from '@fluentui/react';
+import { Stack, PrimaryButton, Image, Text, TextField } from '@fluentui/react';
 import heroSVG from '../../assets/hero.svg';
 import {
   imgStyle,
   infoContainerStyle,
   callContainerStackTokens,
-  callOptionsGroupStyles,
+  // callOptionsGroupStyles,
   configContainerStyle,
   configContainerStackTokens,
   containerStyle,
@@ -17,18 +18,19 @@ import {
   teamsItemStyle,
   buttonStyle
 } from '../styles/HomeScreen.styles';
-import { outboundTextField } from '../styles/HomeScreen.styles';
-import { ThemeSelector } from '../theming/ThemeSelector';
+// import { outboundTextField } from '../styles/HomeScreen.styles';
+// import { ThemeSelector } from '../theming/ThemeSelector';
 import { localStorageAvailable } from '../utils/localStorage';
-import { getDisplayNameFromLocalStorage, saveDisplayNameToLocalStorage } from '../utils/localStorage';
+// import { getDisplayNameFromLocalStorage, saveDisplayNameToLocalStorage } from '../utils/localStorage';
 import { DisplayNameField } from './DisplayNameField';
-import { RoomLocator, TeamsMeetingLinkLocator } from '@azure/communication-calling';
-import { TeamsMeetingIdLocator } from '@azure/communication-calling';
-import { getRoomIdFromUrl } from '../utils/AppUtils';
-import { getIsCTE } from '../utils/AppUtils';
+import { TeamsMeetingLinkLocator } from '@azure/communication-calling';
+// import { TeamsMeetingIdLocator } from '@azure/communication-calling';
+// import { getRoomIdFromUrl } from '../utils/AppUtils';
+// import { getIsCTE } from '../utils/AppUtils';
+import { getTeamsLinkFromUrl } from '../utils/AppUtils';
 import { getTeamsIdFromUrl } from '../utils/AppUtils';
 import { getTeamsTokenFromUrl } from '../utils/AppUtils';
-import { getDisplayNameFromUrl } from '../utils/AppUtils';
+import { getFromDisplayNameFromUrl } from '../utils/AppUtils';
 
 import { CallAdapterLocator } from '@azure/communication-react';
 
@@ -37,7 +39,7 @@ export type CallOption = 'ACSCall' | 'TeamsMeeting' | 'Rooms' | 'StartRooms' | '
 export interface HomeScreenProps {
   startCallHandler(callDetails: {
     displayName: string;
-    callLocator?: CallAdapterLocator | TeamsMeetingLinkLocator | RoomLocator | TeamsMeetingIdLocator;
+    callLocator?: CallAdapterLocator | TeamsMeetingLinkLocator;
     option?: CallOption;
     role?: string;
     teamsToken?: string;
@@ -47,66 +49,71 @@ export interface HomeScreenProps {
   joiningExistingCall: boolean;
 }
 
-type ICallChoiceGroupOption = IChoiceGroupOption & { key: CallOption };
+// type ICallChoiceGroupOption = IChoiceGroupOption & { key: CallOption };
 
 export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
   const imageProps = { src: heroSVG.toString() };
   const headerTitle = props.joiningExistingCall ? 'Join Call' : 'Start or join a call';
-  const callOptionsGroupLabel = 'Select a call option';
+  // const callOptionsGroupLabel = 'Select a call option';
   const buttonText = 'Next';
-  const callOptions: ICallChoiceGroupOption[] = [
-    { key: 'ACSCall', text: 'Start a call' },
-    { key: 'StartRooms', text: 'Start a Rooms call' },
-    { key: 'TeamsMeeting', text: 'Join a Teams meeting using ACS identity' },
-    { key: 'Rooms', text: 'Join a Rooms Call' },
-    { key: 'TeamsIdentity', text: 'Join a Teams call using Teams identity' },
-    { key: 'TeamsAdhoc', text: 'Call a Teams User or voice application' }
-  ];
-  const roomIdLabel = 'Room ID';
+  // const callOptions: ICallChoiceGroupOption[] = [
+  //   { key: 'ACSCall', text: 'Start a call' },
+  //   { key: 'StartRooms', text: 'Start a Rooms call' },
+  //   { key: 'TeamsMeeting', text: 'Join a Teams meeting using ACS identity' },
+  //   { key: 'Rooms', text: 'Join a Rooms Call' },
+  //   { key: 'TeamsIdentity', text: 'Join a Teams call using Teams identity' },
+  //   { key: 'TeamsAdhoc', text: 'Call a Teams User or voice application' }
+  // ];
+  // const roomIdLabel = 'Room ID';
   const teamsTokenLabel = 'Enter a Teams token';
   const teamsIdLabel = 'Enter a Teams Id';
-  const roomsRoleGroupLabel = 'Rooms Role';
-  const roomRoleOptions: IChoiceGroupOption[] = [
-    { key: 'Consumer', text: 'Consumer' },
-    { key: 'Presenter', text: 'Presenter' },
-    { key: 'Attendee', text: 'Attendee' }
-  ];
+  // const roomsRoleGroupLabel = 'Rooms Role';
+  // const roomRoleOptions: IChoiceGroupOption[] = [
+  //   { key: 'Consumer', text: 'Consumer' },
+  //   { key: 'Presenter', text: 'Presenter' },
+  //   { key: 'Attendee', text: 'Attendee' }
+  // ];
 
   // Get display name from local storage if available
-  const defaultDisplayName = localStorageAvailable ? getDisplayNameFromUrl() : null;
+  const defaultDisplayName = localStorageAvailable ? getFromDisplayNameFromUrl() : null;
   const [displayName, setDisplayName] = useState<string | undefined>(defaultDisplayName ?? undefined);
 
-  const [chosenCallOption, setChosenCallOption] = useState<ICallChoiceGroupOption>(callOptions[0]);
-  const [callLocator, setCallLocator] = useState<TeamsMeetingLinkLocator | RoomLocator | TeamsMeetingIdLocator>();
-  const [meetingId, setMeetingId] = useState<string>();
-  const [passcode, setPasscode] = useState<string>();
-  const [chosenRoomsRoleOption, setRoomsRoleOption] = useState<IChoiceGroupOption>(roomRoleOptions[1]);
+  // const [chosenCallOption, setChosenCallOption] = useState<ICallChoiceGroupOption>(callOptions[0]);
+  // const [callLocator, setCallLocator] = useState<TeamsMeetingLinkLocator>();
+  // const [meetingId, setMeetingId] = useState<string>();
+  // const [passcode, setPasscode] = useState<string>();
+  // const [chosenRoomsRoleOption, setRoomsRoleOption] = useState<IChoiceGroupOption>(roomRoleOptions[1]);
+  const [teamsLink, setTeamsLink] = useState<TeamsMeetingLinkLocator>();
   const [teamsToken, setTeamsToken] = useState<string>();
   const [teamsId, setTeamsId] = useState<string>();
-  const [outboundTeamsUsers, setOutboundTeamsUsers] = useState<string | undefined>();
+  // const [outboundTeamsUsers, setOutboundTeamsUsers] = useState<string | undefined>();
 
-  const startGroupCall: boolean = chosenCallOption.key === 'ACSCall';
-  const teamsCallChosen: boolean = chosenCallOption.key === 'TeamsMeeting';
-  const teamsIdentityChosen = chosenCallOption.key === 'TeamsIdentity';
-  const teamsAdhocChosen: boolean = chosenCallOption.key === 'TeamsAdhoc';
+  // const startGroupCall: boolean = chosenCallOption.key === 'ACSCall';
+  // const teamsCallChosen: boolean = chosenCallOption.key === 'TeamsMeeting';
+  // const teamsIdentityChosen = chosenCallOption.key === 'TeamsIdentity';
+  // const teamsAdhocChosen: boolean = chosenCallOption.key === 'TeamsAdhoc';
+  const teamsCallChosen: boolean = true;
+  const teamsIdentityChosen = true;
 
-  const buttonEnabled =
-    (displayName || teamsToken) &&
-    (startGroupCall ||
-      (teamsCallChosen && callLocator) ||
-      (((chosenCallOption.key === 'Rooms' && callLocator) || chosenCallOption.key === 'StartRooms') &&
-        chosenRoomsRoleOption) ||
-      (teamsAdhocChosen && outboundTeamsUsers) ||
-      (teamsIdentityChosen && callLocator && teamsToken && teamsId));
+  // const buttonEnabled =
+  //   (displayName || teamsToken) &&
+  //   (startGroupCall ||
+  //     (teamsCallChosen && callLocator) ||
+  //     (((chosenCallOption.key === 'Rooms' && callLocator) || chosenCallOption.key === 'StartRooms') &&
+  //       chosenRoomsRoleOption) ||
+  //     (teamsAdhocChosen && outboundTeamsUsers) ||
+  //     (teamsIdentityChosen && callLocator && teamsToken && teamsId));
+  const buttonEnabled = teamsLink && teamsToken && teamsId;
 
   const showDisplayNameField = !teamsIdentityChosen;
 
   const [teamsIdFormatError, setTeamsIdFormatError] = useState<boolean>(false);
 
   useEffect(() => {
+    setTeamsLink(getTeamsLinkFromUrl());
     setTeamsId(getTeamsIdFromUrl());
     setTeamsToken(getTeamsTokenFromUrl());
-    setDisplayName(getDisplayNameFromUrl());
+    setDisplayName(getFromDisplayNameFromUrl());
   }, []);
 
   return (
@@ -125,7 +132,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
         </Text>
         <Stack className={configContainerStyle} tokens={configContainerStackTokens}>
           <Stack tokens={callContainerStackTokens}>
-            {!props.joiningExistingCall && (
+            {/* {!props.joiningExistingCall && (
               <ChoiceGroup
                 styles={callOptionsGroupStyles}
                 label={callOptionsGroupLabel}
@@ -137,25 +144,26 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                   setTeamsIdFormatError(false);
                 }}
               />
-            )}
+            )} */}
             {(teamsCallChosen || teamsIdentityChosen) && (
               <TextField
                 className={teamsItemStyle}
                 iconProps={{ iconName: 'Link' }}
                 label={'Meeting Link'}
+                value={teamsLink?.meetingLink}
                 required
                 placeholder={'Enter a Teams meeting link'}
                 onChange={(_, newValue) => {
-                  newValue ? setCallLocator({ meetingLink: newValue }) : setCallLocator(undefined);
+                  newValue ? setTeamsLink({ meetingLink: newValue }) : setTeamsLink(undefined);
                 }}
               />
             )}
-            {(teamsCallChosen || teamsIdentityChosen) && (
+            {/* {(teamsCallChosen || teamsIdentityChosen) && (
               <Text className={teamsItemStyle} block variant="medium">
                 <b>Or</b>
               </Text>
-            )}
-            {(teamsCallChosen || teamsIdentityChosen) && (
+            )} */}
+            {/* {(teamsCallChosen || teamsIdentityChosen) && (
               <TextField
                 className={teamsItemStyle}
                 iconProps={{ iconName: 'MeetingId' }}
@@ -167,8 +175,8 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                   newValue ? setCallLocator({ meetingId: newValue, passcode: passcode }) : setCallLocator(undefined);
                 }}
               />
-            )}
-            {(teamsCallChosen || teamsIdentityChosen) && (
+            )} */}
+            {/* {(teamsCallChosen || teamsIdentityChosen) && (
               <TextField
                 className={teamsItemStyle}
                 iconProps={{ iconName: 'passcode' }}
@@ -180,13 +188,13 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                   meetingId ? setCallLocator({ meetingId: meetingId, passcode: newValue }) : setCallLocator(undefined);
                 }}
               />
-            )}
-            {teamsCallChosen && (
+            )} */}
+            {/* {teamsCallChosen && (
               <Text className={teamsItemStyle} block variant="medium">
                 <b>And</b>
               </Text>
-            )}
-            {(chosenCallOption.key === 'TeamsIdentity' || getIsCTE()) && (
+            )} */}
+            {(
               <Stack>
                 <TextField
                   className={teamsItemStyle}
@@ -198,7 +206,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                 />
               </Stack>
             )}
-            {(chosenCallOption.key === 'TeamsIdentity' || getIsCTE()) && (
+            {(
               <Stack>
                 <TextField
                   className={teamsItemStyle}
@@ -224,7 +232,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                 />
               </Stack>
             )}
-            {chosenCallOption.key === 'Rooms' && (
+            {/* {chosenCallOption.key === 'Rooms' && (
               <Stack>
                 <TextField
                   className={teamsItemStyle}
@@ -234,8 +242,8 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                   onChange={(_, newValue) => setCallLocator(newValue ? { roomId: newValue } : undefined)}
                 />
               </Stack>
-            )}
-            {(chosenCallOption.key === 'Rooms' || chosenCallOption.key === 'StartRooms' || getRoomIdFromUrl()) && (
+            )} */}
+            {/* {(chosenCallOption.key === 'Rooms' || chosenCallOption.key === 'StartRooms' || getRoomIdFromUrl()) && (
               <ChoiceGroup
                 styles={callOptionsGroupStyles}
                 label={roomsRoleGroupLabel}
@@ -244,8 +252,8 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                 required={true}
                 onChange={(_, option) => option && setRoomsRoleOption(option)}
               />
-            )}
-            {teamsAdhocChosen && (
+            )} */}
+            {/* {teamsAdhocChosen && (
               <Stack>
                 <TextField
                   className={outboundTextField}
@@ -269,7 +277,7 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
                   }}
                 />
               </Stack>
-            )}
+            )} */}
           </Stack>
           {showDisplayNameField && <DisplayNameField defaultName={displayName} setName={setDisplayName} />}
           <PrimaryButton
@@ -278,24 +286,24 @@ export const HomeScreen = (props: HomeScreenProps): JSX.Element => {
             text={buttonText}
             onClick={() => {
               if (displayName || teamsIdentityChosen) {
-                displayName && saveDisplayNameToLocalStorage(displayName);
-                const teamsParticipantsToCall = parseParticipants(outboundTeamsUsers);
+                //displayName && saveDisplayNameToLocalStorage(displayName);
+                // const teamsParticipantsToCall = parseParticipants(outboundTeamsUsers);
                 props.startCallHandler({
                   //TODO: This needs to be updated after we change arg types of TeamsCall
                   displayName: !displayName ? 'Teams UserName PlaceHolder' : displayName,
-                  callLocator: callLocator,
-                  option: chosenCallOption.key,
-                  role: chosenRoomsRoleOption.key,
+                  callLocator: teamsLink,
+                  // option: chosenCallOption.key,
+                  // role: chosenRoomsRoleOption.key,
                   teamsToken,
                   teamsId,
-                  outboundTeamsUsers: teamsParticipantsToCall
+                  // outboundTeamsUsers: teamsParticipantsToCall
                 });
               }
             }}
           />
-          <div>
+          {/* <div>
             <ThemeSelector label="Theme" horizontal={true} />
-          </div>
+          </div> */}
         </Stack>
       </Stack>
     </Stack>

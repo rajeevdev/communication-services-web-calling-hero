@@ -1,26 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { GroupLocator, TeamsMeetingLinkLocator } from '@azure/communication-calling';
-import { ParticipantRole, RoomCallLocator } from '@azure/communication-calling';
-import { TeamsMeetingIdLocator } from '@azure/communication-calling';
-import { v1 as generateGUID } from 'uuid';
+// import { GroupLocator, TeamsMeetingLinkLocator } from '@azure/communication-calling';
+import {TeamsMeetingLinkLocator } from '@azure/communication-calling';
+// import { ParticipantRole, RoomCallLocator } from '@azure/communication-calling';
+// import { TeamsMeetingIdLocator } from '@azure/communication-calling';
+// import { v1 as generateGUID } from 'uuid';
 
 /**
  * Get ACS user token from the Contoso server.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const fetchTokenResponse = async (): Promise<any> => {
-  const response = await fetch('/token?scope=voip');
-  if (response.ok) {
-    const responseAsJson = await response.json();
-    const token = responseAsJson.token;
-    if (token) {
-      return responseAsJson;
-    }
-  }
-  throw new Error('Invalid token response');
-};
+// export const fetchTokenResponse = async (): Promise<any> => {
+//   const response = await fetch('/token?scope=voip');
+//   if (response.ok) {
+//     const responseAsJson = await response.json();
+//     const token = responseAsJson.token;
+//     if (token) {
+//       return responseAsJson;
+//     }
+//   }
+//   throw new Error('Invalid token response');
+// };
 
 /**
  * Generate a random user name.
@@ -31,46 +32,46 @@ export const createRandomDisplayName = (): string => 'user' + Math.ceil(Math.ran
 /**
  * Get group id from the url's query params.
  */
-export const getGroupIdFromUrl = (): GroupLocator | undefined => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const gid = urlParams.get('groupId');
-  return gid ? { groupId: gid } : undefined;
-};
+// export const getGroupIdFromUrl = (): GroupLocator | undefined => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   const gid = urlParams.get('groupId');
+//   return gid ? { groupId: gid } : undefined;
+// };
 
-export const createGroupId = (): GroupLocator => ({ groupId: generateGUID() });
+// export const createGroupId = (): GroupLocator => ({ groupId: generateGUID() });
 
 /**
  * Create an ACS room
  */
-export const createRoom = async (): Promise<string> => {
-  const requestOptions = {
-    method: 'POST'
-  };
-  const response = await fetch(`/createRoom`, requestOptions);
-  if (!response.ok) {
-    throw 'Unable to create room';
-  }
+// export const createRoom = async (): Promise<string> => {
+//   const requestOptions = {
+//     method: 'POST'
+//   };
+//   const response = await fetch(`/createRoom`, requestOptions);
+//   if (!response.ok) {
+//     throw 'Unable to create room';
+//   }
 
-  const body = await response.json();
-  return body['id'];
-};
+//   const body = await response.json();
+//   return body['id'];
+// };
 
 /**
  * Add user to an ACS room with a given roomId and role
  */
-export const addUserToRoom = async (userId: string, roomId: string, role: ParticipantRole): Promise<void> => {
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ userId: userId, roomId: roomId, role: role })
-  };
-  const response = await fetch('/addUserToRoom', requestOptions);
-  if (!response.ok) {
-    throw 'Unable to add user to room';
-  }
-};
+// export const addUserToRoom = async (userId: string, roomId: string, role: ParticipantRole): Promise<void> => {
+//   const requestOptions = {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({ userId: userId, roomId: roomId, role: role })
+//   };
+//   const response = await fetch('/addUserToRoom', requestOptions);
+//   if (!response.ok) {
+//     throw 'Unable to add user to room';
+//   }
+// };
 
 /**
  * Get teams meeting link from the url's query params.
@@ -93,21 +94,27 @@ export const getTeamsTokenFromUrl = (): string | undefined => {
   return token ? token : undefined;
 };
 
-export const getDisplayNameFromUrl = (): string | undefined => {
+export const getFromDisplayNameFromUrl = (): string | undefined => {
   const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('displayName');
+  const token = urlParams.get('fromDisplayName');
+  return token ? token : undefined;
+};
+
+export const getTargetDisplayNameFromUrl = (): string | undefined => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('targetDisplayName');
   return token ? token : undefined;
 };
 
 /**
  * Get teams meeting id and passcode from the url's query params.
  */
-export const getMeetingIdFromUrl = (): TeamsMeetingIdLocator | undefined => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const meetingId = urlParams.get('meetingId');
-  const passcode = urlParams.get('passcode');
-  return meetingId ? { meetingId: meetingId, passcode: passcode ? passcode : undefined } : undefined;
-};
+// export const getMeetingIdFromUrl = (): TeamsMeetingIdLocator | undefined => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   const meetingId = urlParams.get('meetingId');
+//   const passcode = urlParams.get('passcode');
+//   return meetingId ? { meetingId: meetingId, passcode: passcode ? passcode : undefined } : undefined;
+// };
 
 /**
  * Get teams meeting link from the url's query params.
@@ -120,11 +127,11 @@ export const getIsCTE = (): boolean | undefined => {
 /**
  * Get room id from the url's query params.
  */
-export const getRoomIdFromUrl = (): RoomCallLocator | undefined => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomId = urlParams.get('roomId');
-  return roomId ? { roomId } : undefined;
-};
+// export const getRoomIdFromUrl = (): RoomCallLocator | undefined => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   const roomId = urlParams.get('roomId');
+//   return roomId ? { roomId } : undefined;
+// };
 
 /*
  * TODO:

@@ -5,22 +5,22 @@ import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 import { CommunicationUserIdentifier } from '@azure/communication-common';
 import { MicrosoftTeamsUserIdentifier } from '@azure/communication-common';
 import {
-  AzureCommunicationCallAdapterOptions,
+  // AzureCommunicationCallAdapterOptions,
   CallAdapterLocator,
   CallAdapterState,
-  useAzureCommunicationCallAdapter,
+  // useAzureCommunicationCallAdapter,
   CommonCallAdapter,
-  CallAdapter,
+  // CallAdapter,
   toFlatCommunicationIdentifier
 } from '@azure/communication-react';
 import { useTeamsCallAdapter, TeamsCallAdapter } from '@azure/communication-react';
 
-import { onResolveVideoEffectDependencyLazy } from '@azure/communication-react';
+// import { onResolveVideoEffectDependencyLazy } from '@azure/communication-react';
 import type { Profile, TeamsAdapterOptions } from '@azure/communication-react';
 import type { StartCallIdentifier } from '@azure/communication-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
-import { WEB_APP_TITLE } from '../utils/AppUtils';
+import { WEB_APP_TITLE, getTargetDisplayNameFromUrl } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 
 export interface CallScreenProps {
@@ -56,13 +56,13 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     });
   }, []);
 
-  const afterCallAdapterCreate = useCallback(
-    async (adapter: CallAdapter): Promise<CallAdapter> => {
-      subscribeAdapterEvents(adapter);
-      return adapter;
-    },
-    [subscribeAdapterEvents]
-  );
+  // const afterCallAdapterCreate = useCallback(
+  //   async (adapter: CallAdapter): Promise<CallAdapter> => {
+  //     subscribeAdapterEvents(adapter);
+  //     return adapter;
+  //   },
+  //   [subscribeAdapterEvents]
+  // );
 
   const afterTeamsCallAdapterCreate = useCallback(
     async (adapter: TeamsCallAdapter): Promise<TeamsCallAdapter> => {
@@ -79,16 +79,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     return createAutoRefreshingCredential(toFlatCommunicationIdentifier(userId), token);
   }, [token, userId, isTeamsIdentityCall]);
 
-  if (isTeamsIdentityCall) {
-    return <TeamsCallScreen afterCreate={afterTeamsCallAdapterCreate} credential={credential} {...props} />;
-  }
-  if (props.callLocator) {
-    return <AzureCommunicationCallScreen afterCreate={afterCallAdapterCreate} credential={credential} {...props} />;
-  } else {
-    return (
-      <AzureCommunicationOutboundCallScreen afterCreate={afterCallAdapterCreate} credential={credential} {...props} />
-    );
-  }
+  return <TeamsCallScreen afterCreate={afterTeamsCallAdapterCreate} credential={credential} {...props} />;
 };
 
 type TeamsCallScreenProps = CallScreenProps & {
@@ -106,13 +97,33 @@ const TeamsCallScreen = (props: TeamsCallScreenProps): JSX.Element => {
     throw new Error('A MicrosoftTeamsUserIdentifier must be provided for Teams Identity Call.');
   }
 
+
+  // For multiple Azure Communication apps joining the same Teams meeting,
+  // you will need to provide a displayName for other participants joining using Teams Identity,
+  // otherwise "Unnamed Participant" would be shown as their default names.
+  const OnFetchProfileCallback = useCallback(async (userId: string, defaultProfile?: Profile): Promise<Profile> => {
+    if (defaultProfile?.displayName) {
+      return defaultProfile;
+    }
+    // You can fetch the display name from GraphAPI or your backend service using userId
+    return { displayName: getTargetDisplayNameFromUrl() };
+  }, []);
+
+  // const options = useMemo(
+  //   () => ({
+  //     onFetchProfile
+  //   }),
+  //   [onFetchProfile]
+  // );
+
   const teamsAdapterOptions: TeamsAdapterOptions = useMemo(
     () => ({
       videoBackgroundOptions: {
         videoBackgroundImages
-      }
+      },
+      onFetchProfile: OnFetchProfileCallback
     }),
-    []
+    [OnFetchProfileCallback]
   );
 
   const adapter = useTeamsCallAdapter(
@@ -127,98 +138,98 @@ const TeamsCallScreen = (props: TeamsCallScreenProps): JSX.Element => {
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };
 
-type AzureCommunicationCallScreenProps = CallScreenProps & {
-  afterCreate?: (adapter: CallAdapter) => Promise<CallAdapter>;
-  credential: AzureCommunicationTokenCredential;
-};
+// type AzureCommunicationCallScreenProps = CallScreenProps & {
+//   afterCreate?: (adapter: CallAdapter) => Promise<CallAdapter>;
+//   credential: AzureCommunicationTokenCredential;
+// };
 
-const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps): JSX.Element => {
-  const { afterCreate, callLocator: locator, userId, ...adapterArgs } = props;
+// const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps): JSX.Element => {
+//   const { afterCreate, callLocator: locator, userId, ...adapterArgs } = props;
 
-  if (!('communicationUserId' in userId)) {
-    throw new Error('A MicrosoftTeamsUserIdentifier must be provided for Teams Identity Call.');
-  }
+//   if (!('communicationUserId' in userId)) {
+//     throw new Error('A MicrosoftTeamsUserIdentifier must be provided for Teams Identity Call.');
+//   }
 
-  const callAdapterOptions: AzureCommunicationCallAdapterOptions = useMemo(() => {
-    return {
-      videoBackgroundOptions: {
-        videoBackgroundImages,
-        onResolveDependency: onResolveVideoEffectDependencyLazy
-      },
-      callingSounds: {
-        callEnded: { url: '/assets/sounds/callEnded.mp3' },
-        callRinging: { url: '/assets/sounds/callRinging.mp3' },
-        callBusy: { url: '/assets/sounds/callBusy.mp3' }
-      },
-      reactionResources: {
-        likeReaction: { url: '/assets/reactions/likeEmoji.png', frameCount: 102 },
-        heartReaction: { url: '/assets/reactions/heartEmoji.png', frameCount: 102 },
-        laughReaction: { url: '/assets/reactions/laughEmoji.png', frameCount: 102 },
-        applauseReaction: { url: '/assets/reactions/clapEmoji.png', frameCount: 102 },
-        surprisedReaction: { url: '/assets/reactions/surprisedEmoji.png', frameCount: 102 }
-      }
-    };
-  }, []);
+//   const callAdapterOptions: AzureCommunicationCallAdapterOptions = useMemo(() => {
+//     return {
+//       videoBackgroundOptions: {
+//         videoBackgroundImages,
+//         onResolveDependency: onResolveVideoEffectDependencyLazy
+//       },
+//       callingSounds: {
+//         callEnded: { url: '/assets/sounds/callEnded.mp3' },
+//         callRinging: { url: '/assets/sounds/callRinging.mp3' },
+//         callBusy: { url: '/assets/sounds/callBusy.mp3' }
+//       },
+//       reactionResources: {
+//         likeReaction: { url: '/assets/reactions/likeEmoji.png', frameCount: 102 },
+//         heartReaction: { url: '/assets/reactions/heartEmoji.png', frameCount: 102 },
+//         laughReaction: { url: '/assets/reactions/laughEmoji.png', frameCount: 102 },
+//         applauseReaction: { url: '/assets/reactions/clapEmoji.png', frameCount: 102 },
+//         surprisedReaction: { url: '/assets/reactions/surprisedEmoji.png', frameCount: 102 }
+//       }
+//     };
+//   }, []);
 
-  const adapter = useAzureCommunicationCallAdapter(
-    {
-      ...adapterArgs,
-      userId,
-      locator,
-      options: callAdapterOptions
-    },
-    afterCreate
-  );
+//   const adapter = useAzureCommunicationCallAdapter(
+//     {
+//       ...adapterArgs,
+//       userId,
+//       locator,
+//       options: callAdapterOptions
+//     },
+//     afterCreate
+//   );
 
-  return <CallCompositeContainer {...props} adapter={adapter} />;
-};
+//   return <CallCompositeContainer {...props} adapter={adapter} />;
+// };
 
-const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScreenProps): JSX.Element => {
-  const { afterCreate, targetCallees: targetCallees, userId, ...adapterArgs } = props;
+// const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScreenProps): JSX.Element => {
+//   const { afterCreate, targetCallees: targetCallees, userId, ...adapterArgs } = props;
 
-  if (!('communicationUserId' in userId)) {
-    throw new Error('A MicrosoftTeamsUserIdentifier must be provided for Teams Identity Call.');
-  }
+//   if (!('communicationUserId' in userId)) {
+//     throw new Error('A MicrosoftTeamsUserIdentifier must be provided for Teams Identity Call.');
+//   }
 
-  const callAdapterOptions: AzureCommunicationCallAdapterOptions = useMemo(() => {
-    return {
-      videoBackgroundOptions: {
-        videoBackgroundImages,
-        onResolveDependency: onResolveVideoEffectDependencyLazy
-      },
-      callingSounds: {
-        callEnded: { url: '/assets/sounds/callEnded.mp3' },
-        callRinging: { url: '/assets/sounds/callRinging.mp3' },
-        callBusy: { url: '/assets/sounds/callBusy.mp3' }
-      },
-      reactionResources: {
-        likeReaction: { url: '/assets/reactions/likeEmoji.png', frameCount: 102 },
-        heartReaction: { url: '/assets/reactions/heartEmoji.png', frameCount: 102 },
-        laughReaction: { url: '/assets/reactions/laughEmoji.png', frameCount: 102 },
-        applauseReaction: { url: '/assets/reactions/clapEmoji.png', frameCount: 102 },
-        surprisedReaction: { url: '/assets/reactions/surprisedEmoji.png', frameCount: 102 }
-      },
-      onFetchProfile: async (userId: string, defaultProfile?: Profile): Promise<Profile | undefined> => {
-        if (userId === '<28:orgid:Enter your teams app here>') {
-          return { displayName: 'Teams app display name' };
-        }
-        return defaultProfile;
-      }
-    };
-  }, []);
+//   const callAdapterOptions: AzureCommunicationCallAdapterOptions = useMemo(() => {
+//     return {
+//       videoBackgroundOptions: {
+//         videoBackgroundImages,
+//         onResolveDependency: onResolveVideoEffectDependencyLazy
+//       },
+//       callingSounds: {
+//         callEnded: { url: '/assets/sounds/callEnded.mp3' },
+//         callRinging: { url: '/assets/sounds/callRinging.mp3' },
+//         callBusy: { url: '/assets/sounds/callBusy.mp3' }
+//       },
+//       reactionResources: {
+//         likeReaction: { url: '/assets/reactions/likeEmoji.png', frameCount: 102 },
+//         heartReaction: { url: '/assets/reactions/heartEmoji.png', frameCount: 102 },
+//         laughReaction: { url: '/assets/reactions/laughEmoji.png', frameCount: 102 },
+//         applauseReaction: { url: '/assets/reactions/clapEmoji.png', frameCount: 102 },
+//         surprisedReaction: { url: '/assets/reactions/surprisedEmoji.png', frameCount: 102 }
+//       },
+//       onFetchProfile: async (userId: string, defaultProfile?: Profile): Promise<Profile | undefined> => {
+//         if (userId === '<28:orgid:Enter your teams app here>') {
+//           return { displayName: 'Teams app display name' };
+//         }
+//         return defaultProfile;
+//       }
+//     };
+//   }, []);
 
-  const adapter = useAzureCommunicationCallAdapter(
-    {
-      ...adapterArgs,
-      userId,
-      targetCallees: targetCallees,
-      options: callAdapterOptions
-    },
-    afterCreate
-  );
+//   const adapter = useAzureCommunicationCallAdapter(
+//     {
+//       ...adapterArgs,
+//       userId,
+//       targetCallees: targetCallees,
+//       options: callAdapterOptions
+//     },
+//     afterCreate
+//   );
 
-  return <CallCompositeContainer {...props} adapter={adapter} />;
-};
+//   return <CallCompositeContainer {...props} adapter={adapter} />;
+// };
 
 const convertPageStateToString = (state: CallAdapterState): string => {
   switch (state.page) {
